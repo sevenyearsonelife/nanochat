@@ -49,6 +49,8 @@ python -m scripts.base_train \
 python -m scripts.base_loss --device_batch_size=1 --split_tokens=4096
 python -m scripts.base_eval --max-per-task=16
 
+exit
+
 # midtraining
 python -m scripts.mid_train \
     --max_seq_len=1024 \
