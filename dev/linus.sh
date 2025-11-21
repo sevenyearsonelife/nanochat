@@ -67,9 +67,9 @@ python -m scripts.chat_eval --source=mid --max-new-tokens=128 --max-problems=20
 python -m scripts.chat_sft \
     --device_batch_size=1 \
     --target_examples_per_step=4 \
-    --num_iterations=100 \
+    --num_iterations=20 \
     --eval_steps=4 \
-    --eval_metrics_max_problems=16
+    --eval_metrics_max_problems=4
 
 # Chat CLI
 # python -m scripts.chat_cli -p "Why is the sky blue?"
