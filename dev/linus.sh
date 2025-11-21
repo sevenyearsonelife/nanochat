@@ -2,7 +2,7 @@
 
 # Showing an example run for exercising some of the code paths on the CPU (or MPS on Macbooks)
 # Run as:
-# bash dev/cpu_demo_run.sh
+# bash dev/linus.sh
 
 # NOTE: Training LLMs requires GPU compute and $$$. You will not get far on your Macbook.
 # Think of this run as educational/fun demo, not something you should expect to work well.
