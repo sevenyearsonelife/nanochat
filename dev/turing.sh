@@ -2,26 +2,19 @@
 
 # Showing an example run for exercising some of the code paths on the CPU (or MPS on Macbooks)
 # Run as:
-# bash dev/linus.sh
+# bash dev/turing.sh
 
 # NOTE: Training LLMs requires GPU compute and $$$. You will not get far on your Macbook.
 # Think of this run as educational/fun demo, not something you should expect to work well.
 # This is also why I hide this script away in dev/
 
-# all the setup stuff
+# 简化后的 setup (仅保留运行时必须的环境配置，非第一次运行)
 export OMP_NUM_THREADS=1
 export NANOCHAT_BASE_DIR="$HOME/.cache/nanochat"
-mkdir -p $NANOCHAT_BASE_DIR
-command -v uv &> /dev/null || curl -LsSf https://astral.sh/uv/install.sh | sh
-[ -d ".venv" ] || uv venv
-uv sync --extra cpu
-source .venv/bin/activate
+source .venv/bin/activate # 关键：激活已存在的虚拟环境
 if [ -z "$WANDB_RUN" ]; then
     WANDB_RUN=dummy
 fi
-curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
-source "$HOME/.cargo/env"
-uv run maturin develop --release --manifest-path rustbpe/Cargo.toml
 
 # wipe the report
 python -m nanochat.report reset
