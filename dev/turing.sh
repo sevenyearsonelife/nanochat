@@ -23,10 +23,8 @@ python -m nanochat.report reset
 python -m nanochat.dataset -n 4
 
 python -m scripts.tok_train --max_chars=10000000
-
-exit
-
 python -m scripts.tok_eval
+exit
 
 # train a very small 4 layer model on the CPU
 # each optimization step processes a single sequence of 1024 tokens
