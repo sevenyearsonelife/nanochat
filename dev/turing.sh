@@ -20,11 +20,11 @@ fi
 python -m nanochat.report reset
 
 # train tokenizer on ~1B characters
-python -m nanochat.dataset -n 4
+# python -m nanochat.dataset -n 4
 
-python -m scripts.tok_train --max_chars=10000000
-python -m scripts.tok_eval
-exit
+# python -m scripts.tok_train --max_chars=10000000
+# python -m scripts.tok_eval
+# exit
 
 # train a very small 4 layer model on the CPU
 # each optimization step processes a single sequence of 1024 tokens
@@ -40,10 +40,11 @@ python -m scripts.base_train \
     --core_metric_max_per_task=12 \
     --sample_every=30 \
     --num_iterations=30
-python -m scripts.base_loss --device_batch_size=1 --split_tokens=4096
-python -m scripts.base_eval --max-per-task=16
 
 exit
+
+python -m scripts.base_loss --device_batch_size=1 --split_tokens=4096
+python -m scripts.base_eval --max-per-task=16
 
 # midtraining
 python -m scripts.mid_train \
