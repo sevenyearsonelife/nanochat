@@ -32,17 +32,17 @@ python -m nanochat.report reset
 # train a very small 4 layer model on the CPU
 # each optimization step processes a single sequence of 1024 tokens
 # we only run 50 steps of optimization (bump this to get better results)
-python -m scripts.base_train \
-    --depth=2 \
-    --max_seq_len=1024 \
-    --device_batch_size=1 \
-    --total_batch_size=1024 \
-    --eval_every=50 \
-    --eval_tokens=4096 \
-    --core_metric_every=-1 \
-    --core_metric_max_per_task=12 \
-    --sample_every=30 \
-    --num_iterations=15
+# python -m scripts.base_train \
+#     --depth=2 \
+#     --max_seq_len=1024 \
+#     --device_batch_size=1 \
+#     --total_batch_size=1024 \
+#     --eval_every=50 \
+#     --eval_tokens=4096 \
+#     --core_metric_every=-1 \
+#     --core_metric_max_per_task=12 \
+#     --sample_every=30 \
+#     --num_iterations=15
 
 #exit
 
