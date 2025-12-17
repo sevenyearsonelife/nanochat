@@ -8,6 +8,9 @@
 # Think of this run as educational/fun demo, not something you should expect to work well.
 # This is also why I hide this script away in dev/
 
+# 注意，执行这份脚本的时候需要先退出conda环境，否则会报错：Reason: no LC_RPATH's found
+conda deactivate
+
 # 简化后的 setup (仅保留运行时必须的环境配置，非第一次运行)
 export OMP_NUM_THREADS=1
 export NANOCHAT_BASE_DIR="$HOME/.cache/nanochat"
@@ -39,12 +42,12 @@ python -m scripts.base_train \
     --core_metric_every=-1 \
     --core_metric_max_per_task=12 \
     --sample_every=30 \
-    --num_iterations=30
+    --num_iterations=15
 
-exit
+#exit
 
-python -m scripts.base_loss --device_batch_size=1 --split_tokens=4096
-python -m scripts.base_eval --max-per-task=16
+#python -m scripts.base_loss --device_batch_size=1 --split_tokens=4096
+#python -m scripts.base_eval --max-per-task=16
 
 # midtraining
 python -m scripts.mid_train \
@@ -53,10 +56,15 @@ python -m scripts.mid_train \
     --eval_every=50 \
     --eval_tokens=4096 \
     --total_batch_size=1024 \
-    --num_iterations=100
+    --num_iterations=10
 # eval results will be terrible, this is just to execute the code paths.
 # note that we lower the execution memory limit to 1MB to avoid warnings on smaller systems
+
+exit
+
 python -m scripts.chat_eval --source=mid --max-new-tokens=128 --max-problems=20
+
+exit
 
 # SFT
 python -m scripts.chat_sft \
