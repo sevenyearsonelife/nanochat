@@ -27,6 +27,8 @@ prompt:
 NOTE: You need OpenRouter API key in a file called "openroutertoken.txt" in the root directory of the repo.
       (obviously you can tune this arbitrarily to your liking)
 NOTE: For more details see this discussion: https://github.com/karpathy/nanochat/discussions/139
+
+python -m dev.gen_synthetic_data
 """
 import requests
 import json
