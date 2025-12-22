@@ -1,6 +1,4 @@
 .venv/
-.claude/
-.cursor/
 __pycache__/
 *.pyc
 rustbpe/target/
