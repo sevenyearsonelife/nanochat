@@ -55,6 +55,18 @@ for epoch in range(10):
     out = model(x)
     loss = criterion(out, y)
     loss.backward()
+
+    # ✅ 查看每一个参数梯度的代码
+    print(f"\n--- Epoch {epoch} Gradients ---")
+    for name, param in model.named_parameters():
+        if param.grad is not None:
+            # 打印参数名、梯度形状、以及梯度的范数（norm，表示梯度的整体大小）
+            print(f"参数: {name:<20} | 梯度形状: {str(param.grad.shape):<15} | 梯度范数: {param.grad.norm().item():.6f}")
+            # 如果想看具体的前几个数值：
+            # print(f"  -> 前5个梯度值: {param.grad.view(-1)[:5].tolist()}")
+        else:
+            print(f"参数: {name} 没有梯度 (可能是 requires_grad=False)")
+    
     optimizer.step()
 
     # ✅ 5) 记录指标（至少把 loss 上报）
