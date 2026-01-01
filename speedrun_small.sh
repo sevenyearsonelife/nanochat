@@ -1,18 +1,18 @@
 #!/bin/bash
 
-# This script is the "Best ChatGPT clone that $100 can buy",
-# It is designed to run in ~4 hours on 8XH100 node at $3/GPU/hour.
+# 这是一份小规模速通脚本，用于在单机/少卡环境下跑通完整流程。
+# 相比 speedrun.sh，这里缩小了训练规模以降低显存与时间成本。
 
-# 1) Example launch (simplest):
-# bash speedrun.sh
-# 2) Example launch in a screen session (because the run takes ~4 hours):
-# screen -L -Logfile speedrun.log -S speedrun bash speedrun.sh
-# 3) Example launch with wandb logging, but see below for setting up wandb first:
-# WANDB_RUN=speedrun screen -L -Logfile speedrun.log -S speedrun bash speedrun.sh
+# 1) 最简单启动方式：
+# bash speedrun_small.sh
+# 2) 使用 screen 启动（长时间任务建议）：
+# screen -L -Logfile speedrun.log -S speedrun bash speedrun_small.sh
+# 3) 启用 wandb 日志（需先登录 wandb）：
+# WANDB_RUN=speedrun screen -L -Logfile speedrun.log -S speedrun bash speedrun_small.sh
 
 # Default intermediate artifacts directory is in ~/.cache/nanochat
 export OMP_NUM_THREADS=1
-export NANOCHAT_BASE_DIR="$HOME/.cache/nanochat"
+export NANOCHAT_BASE_DIR="/root/autodl-tmp/nanochat"
 mkdir -p $NANOCHAT_BASE_DIR
 
 # -----------------------------------------------------------------------------
@@ -83,19 +83,19 @@ echo "Waiting for dataset download to complete..."
 wait $DATASET_DOWNLOAD_PID
 
 # Number of processes/GPUs to use
-NPROC_PER_NODE=2
+NPROC_PER_NODE=1
 
 # pretrain the d20 model
 torchrun --standalone --nproc_per_node=$NPROC_PER_NODE -m scripts.base_train -- \
-  --depth=6 --max_seq_len=512 --device_batch_size=4 --total_batch_size=8192 \
-  --num_iterations=30 --eval_every=10 --eval_tokens=8192 --core_metric_every=-1 \
+  --depth=6 --max_seq_len=512 --device_batch_size=2 --total_batch_size=2048 \
+  --num_iterations=20 --eval_every=10 --eval_tokens=4096 --core_metric_every=-1 \
   --sample_every=100000 --run=$WANDB_RUN
 # evaluate the model on a larger chunk of train/val data and draw some samples
 torchrun --standalone --nproc_per_node=$NPROC_PER_NODE -m scripts.base_loss -- \
-  --device_batch_size=4 --split_tokens=16384
+  --device_batch_size=2 --split_tokens=8192
 # evaluate the model on CORE tasks
 torchrun --standalone --nproc_per_node=$NPROC_PER_NODE -m scripts.base_eval -- \
-  --max-per-task=5
+  --max-per-task=3
 
 # -----------------------------------------------------------------------------
 # Midtraining (teach the model conversation special tokens, tool use, multiple choice)
@@ -106,8 +106,8 @@ curl -L -o $NANOCHAT_BASE_DIR/identity_conversations.jsonl https://karpathy-publ
 
 # run midtraining and eval the model
 torchrun --standalone --nproc_per_node=$NPROC_PER_NODE -m scripts.mid_train -- \
-  --max_seq_len=512 --device_batch_size=4 --total_batch_size=8192 \
-  --num_iterations=20 --eval_every=10 --eval_tokens=8192 --run=$WANDB_RUN
+  --max_seq_len=512 --device_batch_size=2 --total_batch_size=2048 \
+  --num_iterations=10 --eval_every=5 --eval_tokens=4096 --run=$WANDB_RUN
 torchrun --standalone --nproc_per_node=$NPROC_PER_NODE -m scripts.chat_eval -- -i mid
 
 # -----------------------------------------------------------------------------
@@ -115,9 +115,9 @@ torchrun --standalone --nproc_per_node=$NPROC_PER_NODE -m scripts.chat_eval -- -
 
 # train sft and re-eval right away (should see a small bump)
 torchrun --standalone --nproc_per_node=$NPROC_PER_NODE -m scripts.chat_sft -- \
-  --num_iterations=20 --device_batch_size=2 --eval_every=100000 --eval_metrics_every=100000 \
+  --num_iterations=10 --device_batch_size=1 --eval_every=100000 --eval_metrics_every=100000 \
   --run=$WANDB_RUN
-torchrun --standalone --nproc_per_node=$NPROC_PER_NODE -m scripts.chat_eval -- -i sft -a GSM8K -x 20
+torchrun --standalone --nproc_per_node=$NPROC_PER_NODE -m scripts.chat_eval -- -i sft -a GSM8K -x 10
 
 # chat with the model over CLI! Leave out the -p to chat interactively
 # python -m scripts.chat_cli -p "Why is the sky blue?"
