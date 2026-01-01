@@ -10,4 +10,7 @@ openroutertoken.txt
 # WandB 日志和运行文件
 wandb/
 **/wandb/
-
+*.zip
+*.parquet
+mid_train_data/
+chat_sft_data/

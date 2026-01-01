@@ -49,8 +49,8 @@ python -m nanochat.report reset
 # Tokenizer
 
 # Install Rust / Cargo
-curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
-source "$HOME/.cargo/env"
+# curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
+# source "$HOME/.cargo/env"
 
 # Build the rustbpe Tokenizer
 uv run maturin develop --release --manifest-path rustbpe/Cargo.toml
@@ -60,11 +60,11 @@ uv run maturin develop --release --manifest-path rustbpe/Cargo.toml
 # each data shard is ~250M chars
 # so we download 2e9 / 250e6 = 8 data shards at this point
 # each shard is ~100MB of text (compressed), so this is about ~800MB of data on disk
-python -m nanochat.dataset -n 2
+#python -m nanochat.dataset -n 2
 # Immediately also kick off downloading more shards in the background while tokenizer trains
 # See comment below for why 240 is the right number here
-python -m nanochat.dataset -n 4 &
-DATASET_DOWNLOAD_PID=$!
+# python -m nanochat.dataset -n 4 &
+# DATASET_DOWNLOAD_PID=$!
 # train the tokenizer with vocab size 2**16 = 65536 on ~2B characters of data
 python -m scripts.tok_train --max_chars=100000000 --vocab_size=32768
 # evaluate the tokenizer (report compression ratio etc.)
@@ -79,8 +79,8 @@ python -m scripts.tok_eval
 # At 250M chars/shard, this is 54B / 250M ~= 216 shards needed for pretraining.
 # Round up to 240 for safety. At ~100MB/shard, this downloads ~24GB of data to disk.
 # (The total number of shards available in the entire dataset is 1822.)
-echo "Waiting for dataset download to complete..."
-wait $DATASET_DOWNLOAD_PID
+# echo "Waiting for dataset download to complete..."
+# wait $DATASET_DOWNLOAD_PID
 
 # Number of processes/GPUs to use
 NPROC_PER_NODE=1
@@ -95,7 +95,7 @@ torchrun --standalone --nproc_per_node=$NPROC_PER_NODE -m scripts.base_loss -- \
   --device_batch_size=2 --split_tokens=8192
 # evaluate the model on CORE tasks
 torchrun --standalone --nproc_per_node=$NPROC_PER_NODE -m scripts.base_eval -- \
-  --max-per-task=3
+  --max-per-task=11
 
 # -----------------------------------------------------------------------------
 # Midtraining (teach the model conversation special tokens, tool use, multiple choice)
@@ -108,7 +108,7 @@ curl -L -o $NANOCHAT_BASE_DIR/identity_conversations.jsonl https://karpathy-publ
 torchrun --standalone --nproc_per_node=$NPROC_PER_NODE -m scripts.mid_train -- \
   --max_seq_len=512 --device_batch_size=2 --total_batch_size=2048 \
   --num_iterations=10 --eval_every=5 --eval_tokens=4096 --run=$WANDB_RUN
-torchrun --standalone --nproc_per_node=$NPROC_PER_NODE -m scripts.chat_eval -- -i mid
+torchrun --standalone --nproc_per_node=$NPROC_PER_NODE -m scripts.chat_eval -- -i mid -a GSM8K -x 5
 
 # -----------------------------------------------------------------------------
 # Supervised Finetuning (domain adaptation to each sequence all by itself per row)
