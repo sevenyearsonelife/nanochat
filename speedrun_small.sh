@@ -12,8 +12,9 @@
 
 # Default intermediate artifacts directory is in ~/.cache/nanochat
 export OMP_NUM_THREADS=1
-export NANOCHAT_BASE_DIR="/root/autodl-tmp/nanochat"
-mkdir -p $NANOCHAT_BASE_DIR
+# Use default cache dir for data and tokenizer consistency
+export NANOCHAT_BASE_DIR="$HOME/.cache/nanochat"
+mkdir -p ~/.cache/nanochat
 
 # -----------------------------------------------------------------------------
 # Python venv setup with uv
